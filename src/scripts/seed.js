@@ -14,6 +14,6 @@ console.log(contaTesteUm)
 const contaTesteDois = db.prepare(`
     INSERT INTO Conta (Titular, Saldo)
     VALUES (?, ?)
-    `).run("Maria", 750).lastInsertRowid
+    `).run("Caetano", 750).lastInsertRowid
 
 console.log(contaTesteDois)

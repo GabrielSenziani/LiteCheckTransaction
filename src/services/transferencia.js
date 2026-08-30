@@ -16,7 +16,7 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
 
         const conta = db.prepare(`
         SELECT Saldo
-        FROM Conta
+        FROM Conta 
         WHERE ContaId = ?
         `).get(verificaIdOrigem)
 
