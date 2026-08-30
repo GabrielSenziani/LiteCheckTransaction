@@ -66,3 +66,26 @@ describe("Testando lógica", () => {
     expect(resultado).toBe(true)
     })
 })
+
+describe("testando lógica falha", () => {
+    it("Marcela não deve conseguir realizar a transferência por conta do Saldo insuficiente", () => {
+        expect(() => {
+          transferirDinheiro(dbTest, idMarcela, idIsadora, 7000)
+        }).toThrow("Saldo insuficiente!")
+
+        const contaMarcelaQuebrada = dbTest.prepare(`
+            SELECT Saldo
+            FROM Conta
+            WHERE ContaId = ?
+            `).get(idMarcela)
+
+        const contaIsadoraTriste = dbTest.prepare(`
+            SELECT Saldo
+            FROM Conta
+            WHERE ContaId = ?
+            `).get(idIsadora)
+
+    expect(contaMarcelaQuebrada.Saldo).toBe(1700)
+    expect(contaIsadoraTriste.Saldo).toBe(230)
+    })
+})
