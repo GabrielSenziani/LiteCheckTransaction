@@ -1,21 +1,14 @@
-import { transferirDinheiro } from "./services/transferencia.js";
-import db from "./database/database.js";
+import express from "express";
+import "dotenv/config"
+import transferenciaRouter from "../src/routes/transferenciaRoute.js"
 
-const ultimoId = db.prepare(`
-    SELECT *
-    FROM Conta
-    WHERE Titular = ?
-    ORDER BY ContaId DESC
-    LIMIT 1
-    `)
+const app = express()
+const PORT = process.env.PORT
 
-const contaGabrel = ultimoId.get("Gabriel")
-const contaMaria = ultimoId.get("Maria")
+app.use(express.json());
 
-try {
-    transferirDinheiro.immediate(contaGabrel.ContaId, contaMaria.ContaId, 43124)
+app.use("/transferir", transferenciaRouter)
 
-    console.log("Transferencia realizada com sucesso")
-} catch (erro) {
-    console.error("Transferencia negada:", erro.message)
-}
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}.`);
+})

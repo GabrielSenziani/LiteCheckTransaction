@@ -5,13 +5,17 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
         const verificaIdDestino = Number(idDestino)
 
         if (isNaN(verificaIdOrigem) || verificaIdOrigem <= 0 || isNaN(verificaIdDestino) || verificaIdDestino <= 0) {
-            throw new Error("id inválido")
+            const erro = new Error("id inválido")
+            erro.status = 400
+            throw erro
         }
         
         const valorNumerico = Number(valor)
 
         if(isNaN(valorNumerico) || valorNumerico <= 0) {
-            throw new Error("O valor para realizar a transferência precisa ser maior que 0")
+            const erro = new Error("O valor para realizar a transferência precisa ser maior que 0")
+            erro.status = 400
+            throw erro
         }
 
         const conta = db.prepare(`
@@ -21,7 +25,9 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
         `).get(verificaIdOrigem)
 
     if (!conta) {
-        throw new Error("O id da conta não existe")
+        const erro = new Error("O id da conta não existe")
+        erro.status = 404
+        throw erro
     }
 
     const resultadoDaConta = db.prepare(`
@@ -32,7 +38,9 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
         `).run(valorNumerico, verificaIdOrigem, valorNumerico)
 
     if (resultadoDaConta.changes === 0) {
-     throw new Error("Saldo insuficiente!")
+     const erro = new Error("Saldo insuficiente!")
+     erro.status = 422
+     throw erro
     }
 
    const resultadoDestino = db.prepare(`
@@ -42,11 +50,13 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
         `).run(valorNumerico, verificaIdDestino)
 
     if(resultadoDestino.changes === 0) {
-        throw new Error("O id do Destinatário não existe!")
+        const erro = new Error("O id do Destinatário não existe!")
+        erro.status = 404
+        throw erro
     }
 
     return true
   })
 
-  return escolheTransferencia(idOrigem, idDestino, valor)
+  return escolheTransferencia.immediate(idOrigem, idDestino, valor)
 }
