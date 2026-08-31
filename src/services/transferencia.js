@@ -1,14 +1,7 @@
+import { buscaContaPorId } from "./consulta.js"
+
 export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
         const escolheTransferencia = db.transaction((idOrigem, idDestino, valor) => {
-        
-        const verificaIdOrigem = Number(idOrigem)
-        const verificaIdDestino = Number(idDestino)
-
-        if (isNaN(verificaIdOrigem) || verificaIdOrigem <= 0 || isNaN(verificaIdDestino) || verificaIdDestino <= 0) {
-            const erro = new Error("id inválido")
-            erro.status = 400
-            throw erro
-        }
         
         const valorNumerico = Number(valor)
 
@@ -18,24 +11,14 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
             throw erro
         }
 
-        const conta = db.prepare(`
-        SELECT Saldo
-        FROM Conta 
-        WHERE ContaId = ?
-        `).get(verificaIdOrigem)
-
-    if (!conta) {
-        const erro = new Error("O id da conta não existe")
-        erro.status = 404
-        throw erro
-    }
+        buscaContaPorId(db, idOrigem)
 
     const resultadoDaConta = db.prepare(`
         UPDATE Conta
         SET Saldo = Saldo - ?
         WHERE ContaId = ?
         AND Saldo >= ?
-        `).run(valorNumerico, verificaIdOrigem, valorNumerico)
+        `).run(valorNumerico, idOrigem, valorNumerico)
 
     if (resultadoDaConta.changes === 0) {
      const erro = new Error("Saldo insuficiente!")
@@ -43,17 +26,15 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
      throw erro
     }
 
-   const resultadoDestino = db.prepare(`
+    buscaContaPorId(db, idDestino);
+
+    db.prepare(`
          UPDATE Conta 
          SET Saldo = Saldo + ? 
          WHERE ContaId = ?
-        `).run(valorNumerico, verificaIdDestino)
+        `).run(valorNumerico, idDestino)
 
-    if(resultadoDestino.changes === 0) {
-        const erro = new Error("O id do Destinatário não existe!")
-        erro.status = 404
-        throw erro
-    }
+    
 
     return true
   })
