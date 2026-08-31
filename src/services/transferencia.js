@@ -42,7 +42,7 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
         `).run(valorNumerico, verificaIdDestino)
 
     if(resultadoDestino.changes === 0) {
-        throw new Error("O id do Destinatário não existe ou é inválido!")
+        throw new Error("O id do Destinatário não existe!")
     }
 
     return true

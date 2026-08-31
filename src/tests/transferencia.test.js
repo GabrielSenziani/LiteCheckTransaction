@@ -89,3 +89,28 @@ describe("testando lógica falha", () => {
     expect(contaIsadoraTriste.Saldo).toBe(230)
     })
 })
+
+describe("testando lógica falha de id", () => {
+     const idInexistente = 9999
+
+    it("Marcela não deve ser capaz de realizar tranferência para id inexistente", () => {
+        expect(() => {
+            transferirDinheiro(dbTest, idMarcela, idInexistente, 500) 
+        }).toThrow("O id do Destinatário não existe!")
+
+        const falhaMarcela = dbTest.prepare(`
+            SELECT Saldo
+            FROM Conta
+            WHERE ContaId = ?
+            `).get(idMarcela)
+
+        const falhaIdInexistente = dbTest.prepare(`
+            SELECT Saldo
+            FROM Conta
+            WHERE ContaId = ?
+            `).get(idInexistente)
+
+        expect(falhaMarcela.Saldo).toBe(1700)
+        expect(falhaIdInexistente).toBeUndefined()
+    })
+})
