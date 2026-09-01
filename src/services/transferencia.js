@@ -12,6 +12,7 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
         }
 
         buscaContaPorId(db, idOrigem)
+        buscaContaPorId(db, idDestino);
 
     const resultadoDaConta = db.prepare(`
         UPDATE Conta
@@ -25,8 +26,6 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
      erro.status = 422
      throw erro
     }
-
-    buscaContaPorId(db, idDestino);
 
     db.prepare(`
          UPDATE Conta 

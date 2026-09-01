@@ -1,12 +1,11 @@
 import Database from "better-sqlite3";
-import supertest from "supertest";
 
 import { transferirDinheiro } from "../services/transferencia.js";
 
 let idMarcela
 let idIsadora
 
-const dbTest = new Database("src/database/sqlite.test.db")
+const dbTest = new Database(":memory:")
 
 beforeAll(() => {
     dbTest.pragma("foreign_keys = ON");
@@ -88,6 +87,27 @@ describe("testando lógica falha", () => {
     expect(contaMarcelaQuebrada.Saldo).toBe(1700)
     expect(contaIsadoraTriste.Saldo).toBe(230)
     })
+
+   it("Marcela não deve conseguir realizar uma transferência com valor negativo", () => {
+    expect(() => {
+        transferirDinheiro(dbTest, idMarcela, idIsadora, -2000)
+    }).toThrow("O valor para realizar a transferência precisa ser maior que 0")
+
+    const transferenciaNegativa = dbTest.prepare(`
+        SELECT Saldo
+        FROM Conta
+        WHERE ContaId = ?
+        `).get(idMarcela)
+
+    const naoRecebeValorNegativo = dbTest.prepare(`
+        SELECT Saldo
+        FROM Conta
+        WHERE ContaId = ?
+        `).get(idIsadora)
+
+    expect(transferenciaNegativa.Saldo).toBe(1700)
+    expect(naoRecebeValorNegativo.Saldo).toBe(230)
+   })
 })
 
 describe("testando lógica falha de id", () => {
@@ -96,7 +116,7 @@ describe("testando lógica falha de id", () => {
     it("Marcela não deve ser capaz de realizar tranferência para id inexistente", () => {
         expect(() => {
             transferirDinheiro(dbTest, idMarcela, idInexistente, 500) 
-        }).toThrow("O id do Destinatário não existe!")
+        }).toThrow("O id da conta não existe")
 
         const falhaMarcela = dbTest.prepare(`
             SELECT Saldo
@@ -113,4 +133,50 @@ describe("testando lógica falha de id", () => {
         expect(falhaMarcela.Saldo).toBe(1700)
         expect(falhaIdInexistente).toBeUndefined()
     })
+
+   it("Marcela não deve ser capaz de realizar transferência para id inválido", () => {
+    const idInvalido = "id-invalido"
+
+    expect(() => {
+        transferirDinheiro(dbTest, idMarcela, idInvalido, 400)
+    }).toThrow("Formato do id inválido")
+
+    const tranferênciaFalha = dbTest.prepare(`
+    SELECT Saldo
+    FROM Conta
+    WHERE ContaId = ?
+    `).get(idMarcela)
+
+    const recebimentoFalho = dbTest.prepare(`
+    SELECT Saldo
+    FROM Conta
+    WHERE ContaId = ?
+    `).get(idInvalido)
+
+  expect(tranferênciaFalha.Saldo).toBe(1700)
+  expect(recebimentoFalho).toBeUndefined()
+   })
+
+   it("Marcela não deve ser capaz de realizar transferência para id com numero negativo", () => {
+    const idNegativo = -1
+
+    expect(() => {
+        transferirDinheiro(dbTest, idMarcela, idNegativo, 500)
+    }).toThrow("Formato do id inválido")
+
+    const falhaNaTransferencia = dbTest.prepare(`
+        SELECT Saldo
+        FROM Conta
+        WHERE ContaId = ?
+        `).get(idMarcela)
+
+    const idNegativoNaoRecebe = dbTest.prepare(`
+        SELECT Saldo
+        FROM Conta
+        WHERE ContaId = ?
+        `).get(idNegativo)
+
+    expect(falhaNaTransferencia.Saldo).toBe(1700)
+    expect(idNegativoNaoRecebe).toBeUndefined()
+   })
 })

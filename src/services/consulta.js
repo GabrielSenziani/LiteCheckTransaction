@@ -11,7 +11,7 @@ export const buscaContaPorId = (db, id) => {
         SELECT ContaId, Saldo
         FROM Conta
         WHERE ContaId = ?
-        `).get(id)
+        `).get(verificaFormatoDoId)
 
     if (!conta) {
         const erro = new Error("O id da conta não existe")
