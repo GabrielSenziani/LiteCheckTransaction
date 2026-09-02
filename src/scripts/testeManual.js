@@ -10,10 +10,10 @@ const ultimoId = db.prepare(`
     `)
 
 const contaGabrel = ultimoId.get("Gabriel")
-const contaMaria = ultimoId.get("Maria")
+const contaCaetano = ultimoId.get("Caetano")
 
 try {
-    transferirDinheiro(db, contaGabrel.ContaId, contaMaria.ContaId, 43124)
+    transferirDinheiro(db, contaGabrel.ContaId, contaCaetano.ContaId, 43124)
 
     console.log("Transferencia realizada com sucesso")
 } catch (erro) {
