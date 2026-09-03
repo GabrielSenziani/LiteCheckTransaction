@@ -10,7 +10,7 @@ export const buscaContaPorId = (db, id) => {
     const conta = db.prepare(`
         SELECT ContaId, Saldo
         FROM Conta
-        WHERE ContaId = ?
+        WHERE UsuarioId = ?
         `).get(verificaFormatoDoId)
 
     if (!conta) {

@@ -3,7 +3,7 @@ import db from "../database/database.js";
 
 export const consulta = (req, res) => {
     try {
-        const { id } = req.params
+        const id  = req.UsuarioId
 
         const conta = buscaContaPorId(db, id)
 

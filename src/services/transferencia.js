@@ -17,7 +17,7 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
     const resultadoDaConta = db.prepare(`
         UPDATE Conta
         SET Saldo = Saldo - ?
-        WHERE ContaId = ?
+        WHERE UsuarioId = ?
         AND Saldo >= ?
         `).run(valorNumerico, idOrigem, valorNumerico)
 
@@ -30,7 +30,7 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
     db.prepare(`
          UPDATE Conta 
          SET Saldo = Saldo + ? 
-         WHERE ContaId = ?
+         WHERE UsuarioId = ?
         `).run(valorNumerico, idDestino)
 
     

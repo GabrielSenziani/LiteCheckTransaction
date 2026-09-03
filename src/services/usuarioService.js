@@ -37,12 +37,24 @@ export const cadastraUsuario = (db, email, senha) => {
 
   const senhaCriptografada = bcrypt.hashSync(senha, 10)
 
-    const resultado = db.prepare(`
+  const realizaCadastro = db.transaction(() => {
+        const resultado = db.prepare(`
         INSERT INTO Usuario (Email, Senha)
         VALUES (?, ?)
         `).run(email, senhaCriptografada)
 
-        return resultado.lastInsertRowid
+        const idNovo = resultado.lastInsertRowid
+
+        const nomeTitular = email.split("@")[0]
+
+        db.prepare(`
+            INSERT INTO Conta (Titular, Saldo, UsuarioId)
+            VALUES (?, ?, ?)
+            `).run(nomeTitular, 0.00, idNovo) //Futuramente havera uma funcionalidade de deposito para a propria conta, por isso todas as contas criadas começam com o saldo zerado.
+
+            return idNovo
+  })
+  return realizaCadastro()
 }
 
 export const logaUsuario= (db, email, senha) => {
@@ -79,13 +91,13 @@ export const logaUsuario= (db, email, senha) => {
     }
 
     const geraToken = JWT.sign(
-        {id: usuario.UsuarioId},
+        { id: usuario.UsuarioId},
         process.env.JWT_SECRET,
         {expiresIn: "1d"}
     )
 
     return {
-        usuarioId: usuario.UsuarioId,
+        UsuarioId: usuario.UsuarioId,
         email: usuario.Email,
         token: geraToken
     }

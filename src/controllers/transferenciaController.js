@@ -3,9 +3,10 @@ import db from "../database/database.js"
 
 export const transferir = (req, res) => {
     try {
-        const { idOrigem, idDestino, valor } = req.body
+        const idOrigem = req.usuarioId
+        const { idDestino, valor } = req.body
 
-        if(!idOrigem || !idDestino || !valor) {
+        if(!idDestino || !valor) {
           return res.status(400).json({
             message: "Faltam dados obrigatórios"
           })
