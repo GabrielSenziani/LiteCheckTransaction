@@ -20,7 +20,7 @@ export function autorizacao (req, res, next) {
       return next()
     } catch (erro) {
         return res.status(401).json({
-            message: "token inválido ou expirado"
+            message: "Token inválido ou expirado"
         })
      }
 }

@@ -20,3 +20,5 @@ app.use("/contas", consultaRouter)
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}.`);
 })
+
+export default app;

@@ -6,6 +6,7 @@ import { buscaContaPorId } from "../services/consulta.js";
 let idDoFabio 
 
 const dbTest = new Database(":memory:")
+
 beforeAll(() => {
   
   dbTest.pragma(`foreign_keys = ON`)
