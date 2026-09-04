@@ -11,31 +11,43 @@ beforeAll(() => {
   dbTest.pragma(`foreign_keys = ON`)
 
   dbTest.exec(`
+    CREATE TABLE IF NOT EXISTS Usuario(
+    UsuarioId INTEGER PRIMARY KEY AUTOINCREMENT,
+    Email TEXT NOT NULL UNIQUE,
+    Senha TEXT NOT NULL 
+    )
+    `)
+
+  dbTest.exec(`
     CREATE TABLE IF NOT EXISTS CONTA(
     ContaId INTEGER PRIMARY KEY,
     Titular TEXT NOT NULL,
-    Saldo NUMERIC NOT NULL CHECK (Saldo >= 0)
+    Saldo NUMERIC NOT NULL CHECK (Saldo >= 0),
+    UsuarioId INTEGER NOT NULL,
+    FOREIGN KEY (UsuarioId) REFERENCES Usuario(UsuarioId)
     ) 
     `)
 })
 
 beforeEach(() => {
   dbTest.exec(`DELETE FROM Conta`)
+  dbTest.exec(`DELETE FROM Usuario`)
 
-  const criaConta = dbTest.prepare(`
-    INSERT INTO Conta (Titular, Saldo)
+  const criaUsuario = dbTest.prepare(`
+    INSERT INTO Usuario (Email, Senha)
     VALUES (?, ?)
     `)
 
-    criaConta.run("Fabio", 1200)
+  const userFabio = criaUsuario.run("fabio@email.com", "senha1563")
 
-  const buscaConta = dbTest.prepare(`
-    SELECT ContaId
-    FROM Conta
-    WHERE Titular = ?
+  idDoFabio = userFabio.lastInsertRowid
+
+  const criaConta = dbTest.prepare(`
+    INSERT INTO Conta (Titular, Saldo, UsuarioId)
+    VALUES (?, ?, ?)
     `)
 
-  idDoFabio = buscaConta.get("Fabio").ContaId
+    criaConta.run("Fabio", 1200, idDoFabio)
 })
 
 afterAll(() => {

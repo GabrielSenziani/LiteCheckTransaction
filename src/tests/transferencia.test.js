@@ -11,33 +11,46 @@ beforeAll(() => {
     dbTest.pragma("foreign_keys = ON");
 
     dbTest.exec(`
+    CREATE TABLE IF NOT EXISTS Usuario(
+    UsuarioId INTEGER PRIMARY KEY AUTOINCREMENT,
+    Email TEXT NOT NULL UNIQUE,
+    Senha TEXT NOT NULL 
+    )
+    `)
+
+    dbTest.exec(`
         CREATE TABLE IF NOT EXISTS Conta(
         ContaId INTEGER PRIMARY KEY,
         Titular TEXT NOT NULL,
-        Saldo NUMERIC NOT NULL CHECK (Saldo >= 0)
+        Saldo NUMERIC NOT NULL CHECK (Saldo >= 0),
+        UsuarioId INTEGER NOT NULL,
+        FOREIGN KEY (UsuarioId) REFERENCES Usuario(UsuarioId)
         )
         `)
 }) 
 
 beforeEach(() => {
     dbTest.exec("DELETE FROM Conta");
+    dbTest.exec("DELETE FROM Usuario");
 
-    const criaContas = dbTest.prepare(`
-        INSERT INTO Conta (Titular, Saldo)
+    criUsuario = dbTest.prepare(`
+        INSERT INTO Usuario (Email, Senha)
         VALUES (?, ?)
         `)
 
-        criaContas.run("Marcela", 1700)
-        criaContas.run("Isadora", 230)
+    const userMarcela = criUsuario.run("marcela@email.com", "senha1234")
+    const usarIsadora = criUsuario.run("isadora@email.com", "senha123")
 
-    const buscaContas = dbTest.prepare(`
-        SELECT ContaId
-        FROM Conta
-        WHERE Titular = ?
+    idMarcela = userMarcela.lastInsertRowid
+    idIsadora = usarIsadora.lastInsertRowid
+
+    const criaContas = dbTest.prepare(`
+        INSERT INTO Conta (Titular, Saldo, UsuarioId)
+        VALUES (?, ?, ?)
         `)
 
-    idMarcela = buscaContas.get("Marcela").ContaId
-    idIsadora = buscaContas.get("Isadora").ContaId
+        criaContas.run("Marcela", 1700, idMarcela)
+        criaContas.run("Isadora", 230, idIsadora)
 })
 
 afterAll(() => {
@@ -51,13 +64,13 @@ describe("Testando lógica", () => {
       const contaMarcela = dbTest.prepare(`
         SELECT Saldo
         FROM Conta
-        WHERE ContaId = ?
+        WHERE UsuarioId = ?
         `).get(idMarcela)
 
      const contaIsadora = dbTest.prepare(`
         SELECT Saldo
         FROM Conta
-        WHERE ContaId = ?
+        WHERE UsuarioId = ?
         `).get(idIsadora)
 
     expect(contaMarcela.Saldo).toBe(1200)
@@ -75,13 +88,13 @@ describe("testando lógica falha", () => {
         const contaMarcelaQuebrada = dbTest.prepare(`
             SELECT Saldo
             FROM Conta
-            WHERE ContaId = ?
+            WHERE UsuarioId = ?
             `).get(idMarcela)
 
         const contaIsadoraTriste = dbTest.prepare(`
             SELECT Saldo
             FROM Conta
-            WHERE ContaId = ?
+            WHERE UsuarioId = ?
             `).get(idIsadora)
 
     expect(contaMarcelaQuebrada.Saldo).toBe(1700)
@@ -96,13 +109,13 @@ describe("testando lógica falha", () => {
     const transferenciaNegativa = dbTest.prepare(`
         SELECT Saldo
         FROM Conta
-        WHERE ContaId = ?
+        WHERE UsuarioId = ?
         `).get(idMarcela)
 
     const naoRecebeValorNegativo = dbTest.prepare(`
         SELECT Saldo
         FROM Conta
-        WHERE ContaId = ?
+        WHERE UsuarioId = ?
         `).get(idIsadora)
 
     expect(transferenciaNegativa.Saldo).toBe(1700)
@@ -121,13 +134,13 @@ describe("testando lógica falha de id", () => {
         const falhaMarcela = dbTest.prepare(`
             SELECT Saldo
             FROM Conta
-            WHERE ContaId = ?
+            WHERE UsuarioId = ?
             `).get(idMarcela)
 
         const falhaIdInexistente = dbTest.prepare(`
             SELECT Saldo
             FROM Conta
-            WHERE ContaId = ?
+            WHERE UsuarioId = ?
             `).get(idInexistente)
 
         expect(falhaMarcela.Saldo).toBe(1700)
@@ -144,13 +157,13 @@ describe("testando lógica falha de id", () => {
     const tranferênciaFalha = dbTest.prepare(`
     SELECT Saldo
     FROM Conta
-    WHERE ContaId = ?
+    WHERE UsuarioId = ?
     `).get(idMarcela)
 
     const recebimentoFalho = dbTest.prepare(`
     SELECT Saldo
     FROM Conta
-    WHERE ContaId = ?
+    WHERE UsuarioId = ?
     `).get(idInvalido)
 
   expect(tranferênciaFalha.Saldo).toBe(1700)
@@ -167,13 +180,13 @@ describe("testando lógica falha de id", () => {
     const falhaNaTransferencia = dbTest.prepare(`
         SELECT Saldo
         FROM Conta
-        WHERE ContaId = ?
+        WHERE UsuarioId = ?
         `).get(idMarcela)
 
     const idNegativoNaoRecebe = dbTest.prepare(`
         SELECT Saldo
         FROM Conta
-        WHERE ContaId = ?
+        WHERE UsuarioId = ?
         `).get(idNegativo)
 
     expect(falhaNaTransferencia.Saldo).toBe(1700)
