@@ -1,6 +1,6 @@
 import JWT from "jsonwebtoken"
 import supertest from "supertest"
-import app from "../server.js"
+import app from "../app.js"
 import db from "../database/database.js"
 
 let usuarioId
