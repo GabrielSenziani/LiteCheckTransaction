@@ -3,7 +3,7 @@ import db from "../database/database.js"
 
 export const transferir = (req, res) => {
     try {
-        const idOrigem = req.usuarioId
+        const idOrigem = req.UsuarioId
         const { idDestino, valor } = req.body
 
         if(!idDestino || !valor) {

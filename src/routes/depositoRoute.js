@@ -1,9 +1,9 @@
 import express from "express";
-import { transferir } from "../controllers/transferenciaController.js";
+import { deposito } from "../controllers/depositoController.js";
 import { autorizacao } from "../middlewares/auth.js";
 
 const router = express.Router()
 
-router.post("/", autorizacao, transferir)
+router.post("/", autorizacao, deposito)
 
 export default router;

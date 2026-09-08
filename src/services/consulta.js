@@ -8,7 +8,7 @@ export const buscaContaPorId = (db, id) => {
     }
 
     const conta = db.prepare(`
-        SELECT ContaId, Saldo
+        SELECT ContaId, Saldo, UsuarioId
         FROM Conta
         WHERE UsuarioId = ?
         `).get(verificaFormatoDoId)
