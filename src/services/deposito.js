@@ -27,6 +27,11 @@ export const depositaDinheiro = (db, idOrigem, valor, idContaAlvo) => {
          WHERE UsuarioId = ?
         `).run(valorNumerico, contaParaDepositar)
 
+        db.prepare(`
+          INSERT INTO Transacao (Tipo, Valor, ContaOrigemId, ContaDestinoId)
+          VALUES ('Deposito', ?, NULL, ?)
+        `).run(valorNumerico, contaParaDepositar)
+
         return true
     })
 

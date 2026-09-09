@@ -7,6 +7,7 @@ let usuarioId
 
 
 beforeEach(() => {
+    db.exec("DELETE FROM Transacao")
     db.exec("DELETE FROM Conta")
     db.exec("DELETE FROM Usuario")
 

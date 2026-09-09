@@ -33,6 +33,11 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
          WHERE UsuarioId = ?
         `).run(valorNumerico, idDestino)
 
+    db.prepare(`
+        INSERT INTO Transacao (Tipo, Valor, ContaOrigemId, ContaDestinoId)
+        VALUES ('Transferencia', ?, ?, ?)
+        `)
+
     
 
     return true

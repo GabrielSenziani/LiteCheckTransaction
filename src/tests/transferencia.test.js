@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 
 import { transferirDinheiro } from "../services/transferencia.js";
+import { inicializaTabelas } from "../helpers/setupDb.js";
 
 let idMarcela
 let idIsadora
@@ -8,25 +9,7 @@ let idIsadora
 const dbTest = new Database(":memory:")
 
 beforeAll(() => {
-    dbTest.pragma("foreign_keys = ON");
-
-    dbTest.exec(`
-    CREATE TABLE IF NOT EXISTS Usuario(
-    UsuarioId INTEGER PRIMARY KEY AUTOINCREMENT,
-    Email TEXT NOT NULL UNIQUE,
-    Senha TEXT NOT NULL 
-    )
-    `)
-
-    dbTest.exec(`
-        CREATE TABLE IF NOT EXISTS Conta(
-        ContaId INTEGER PRIMARY KEY,
-        Titular TEXT NOT NULL,
-        Saldo NUMERIC NOT NULL CHECK (Saldo >= 0),
-        UsuarioId INTEGER NOT NULL,
-        FOREIGN KEY (UsuarioId) REFERENCES Usuario(UsuarioId)
-        )
-        `)
+    inicializaTabelas(dbTest)
 }) 
 
 beforeEach(() => {
