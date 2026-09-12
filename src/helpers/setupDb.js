@@ -22,7 +22,7 @@ export const inicializaTabelas = (db) => {
     db.exec(`
         CREATE TABLE IF NOT EXISTS Transacao (
             TransacaoId INTEGER PRIMARY KEY AUTOINCREMENT,
-            Tipo TEXT NOT NULL CHECK (Tipo IN ('Deposito', 'Transacao')),
+            Tipo TEXT NOT NULL CHECK (Tipo IN ('Deposito', 'Transferencia')),
             Valor NUMERIC NOT NULL CHECK (Valor > 0),
             ContaOrigemId INTEGER,
             ContaDestinoId INTEGER NOT NULL,

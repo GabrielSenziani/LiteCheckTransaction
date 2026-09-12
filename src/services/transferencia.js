@@ -11,13 +11,19 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
             throw erro
         }
 
+         if (idOrigem === idDestino) {
+            const erro = new Error("Não é possível realizar uma transferência para a sua própria conta.")
+            erro.status = 400;
+            throw erro;
+        }
+
         buscaContaPorId(db, idOrigem)
         buscaContaPorId(db, idDestino);
 
     const resultadoDaConta = db.prepare(`
         UPDATE Conta
         SET Saldo = Saldo - ?
-        WHERE UsuarioId = ?
+        WHERE ContaId = ?
         AND Saldo >= ?
         `).run(valorNumerico, idOrigem, valorNumerico)
 
@@ -30,13 +36,13 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
     db.prepare(`
          UPDATE Conta 
          SET Saldo = Saldo + ? 
-         WHERE UsuarioId = ?
+         WHERE ContaId = ?
         `).run(valorNumerico, idDestino)
 
     db.prepare(`
         INSERT INTO Transacao (Tipo, Valor, ContaOrigemId, ContaDestinoId)
         VALUES ('Transferencia', ?, ?, ?)
-        `)
+        `).run(valorNumerico, idOrigem, idDestino)
 
     
 
