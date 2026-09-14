@@ -4,15 +4,14 @@ import db from "../database/database.js";
 export const deletaTodosOsDados = (req, res) => {
     try {
         const id = req.UsuarioId
-        const { idAlvo } = req.params
 
-        if (!id || !idAlvo) {
-            return res.status(400).json({
-                message: "É necessário preencher com os dados obrigatórios (id, idAlvo)"
+        if (!id) {
+            return res.status(401).json({
+                message: "Usuário não autenticado."
             })
         }
 
-        deletaDados(db, id, idAlvo)
+        deletaDados(db, id)
 
         return res.status(200).json({
         message: "Exclusão dos dados realizada com sucesso!"

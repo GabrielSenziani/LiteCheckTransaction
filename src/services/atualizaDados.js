@@ -1,18 +1,12 @@
  import bcrypt from "bcrypt";
- import { buscaContaPorId } from "./consulta.js";
+ import { buscaContaPorUsuarioId } from "./consulta.js";
 
  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export const atualizaDados = (db, id, idAlvo ,email, senha) => {
+export const atualizaDados = (db, id ,email, senha) => {
 
-    const dadosParaAtualizar = idAlvo || id
-    const contaAlvo = buscaContaPorId(db, dadosParaAtualizar)
+    const contaAlvo = buscaContaPorUsuarioId(db, id)
 
-    if (contaAlvo.UsuarioId !== id) {
-      const erro = new Error("Você não tem permissão para atualizar os dados desta conta")
-      erro.status = 403 
-      throw erro
-    }
   if (!email || !senha) {
     const erro = new Error ("É necessário preencher os campos Email e senha")
     erro.status = 400

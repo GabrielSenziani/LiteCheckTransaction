@@ -20,3 +20,26 @@ export const buscaContaPorId = (db, id) => {
     }
     return conta
 }
+
+export const buscaContaPorUsuarioId = (db, id) => {
+    const verificaFormatoDoId = Number(id)
+
+    if (isNaN(verificaFormatoDoId) || verificaFormatoDoId <= 0) {
+        const erro = new Error("Formato do id inválido")
+        erro.status = 400
+        throw erro
+    }
+
+    const conta = db.prepare(`
+        SELECT ContaId, Saldo, UsuarioId
+        FROM Conta
+        WHERE UsuarioId = ?
+        `).get(verificaFormatoDoId)
+
+    if (!conta) {
+        const erro = new Error("Nenhuma conta encontrada para este usuario")
+        erro.status = 404
+        throw erro
+    }
+    return conta
+}

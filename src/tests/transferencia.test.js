@@ -48,7 +48,7 @@ afterAll(() => {
 
 describe("Testando lógica", () => {
     it("Marcela deve realizar uma transferência para Isadora", () => {
-      const resultado = transferirDinheiro(dbTest, idContaMarcela, idContaIsadora, 500)
+      const resultado = transferirDinheiro(dbTest, idMarcela, idContaIsadora, 500)
 
       const contaMarcela = dbTest.prepare(`
         SELECT Saldo
@@ -71,7 +71,7 @@ describe("Testando lógica", () => {
 describe("testando lógica falha", () => {
     it("Marcela não deve conseguir realizar a transferência por conta do Saldo insuficiente", () => {
         expect(() => {
-          transferirDinheiro(dbTest, idContaMarcela, idContaIsadora, 7000)
+          transferirDinheiro(dbTest, idMarcela, idContaIsadora, 7000)
         }).toThrow("Saldo insuficiente!")
 
         const contaMarcelaQuebrada = dbTest.prepare(`
@@ -92,7 +92,7 @@ describe("testando lógica falha", () => {
 
    it("Marcela não deve conseguir realizar uma transferência com valor negativo", () => {
     expect(() => {
-        transferirDinheiro(dbTest, idContaMarcela, idContaIsadora, -2000)
+        transferirDinheiro(dbTest, idMarcela, idContaIsadora, -2000)
     }).toThrow("O valor para realizar a transferência precisa ser maior que 0")
 
     const transferenciaNegativa = dbTest.prepare(`
@@ -117,7 +117,7 @@ describe("testando lógica falha de id", () => {
 
     it("Marcela não deve ser capaz de realizar tranferência para id inexistente", () => {
         expect(() => {
-            transferirDinheiro(dbTest, idContaMarcela, idInexistente, 500) 
+            transferirDinheiro(dbTest, idMarcela, idInexistente, 500) 
         }).toThrow("O id da conta não existe")
 
         const falhaMarcela = dbTest.prepare(`
@@ -140,7 +140,7 @@ describe("testando lógica falha de id", () => {
     const idInvalido = "id-invalido"
 
     expect(() => {
-        transferirDinheiro(dbTest, idContaMarcela, idInvalido, 400)
+        transferirDinheiro(dbTest, idMarcela, idInvalido, 400)
     }).toThrow("Formato do id inválido")
 
     const tranferênciaFalha = dbTest.prepare(`
@@ -163,7 +163,7 @@ describe("testando lógica falha de id", () => {
     const idNegativo = -1
 
     expect(() => {
-        transferirDinheiro(dbTest, idContaMarcela, idNegativo, 500)
+        transferirDinheiro(dbTest, idMarcela, idNegativo, 500)
     }).toThrow("Formato do id inválido")
 
     const falhaNaTransferencia = dbTest.prepare(`

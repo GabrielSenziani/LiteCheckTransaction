@@ -5,6 +5,6 @@ import { autorizacao } from "../middlewares/auth.js";
 
 const router = express.Router()
 
-router.delete("/meus-dados/:idAlvo", autorizacao, deletaTodosOsDados)
+router.delete("/meus-dados", autorizacao, deletaTodosOsDados)
 
 export default router

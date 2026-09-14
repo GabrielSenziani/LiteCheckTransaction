@@ -25,10 +25,10 @@ export const inicializaTabelas = (db) => {
             Tipo TEXT NOT NULL CHECK (Tipo IN ('Deposito', 'Transferencia')),
             Valor NUMERIC NOT NULL CHECK (Valor > 0),
             ContaOrigemId INTEGER,
-            ContaDestinoId INTEGER NOT NULL,
+            ContaDestinoId INTEGER,
             DataHora DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (ContaOrigemId) REFERENCES Usuario(UsuarioId),
-            FOREIGN KEY (ContaDestinoId) REFERENCES Usuario(UsuarioId)
+            FOREIGN KEY (ContaOrigemId) REFERENCES Conta(ContaId),
+            FOREIGN KEY (ContaDestinoId) REFERENCES Conta(ContaId)
         );
     `);
 };

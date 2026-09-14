@@ -1,17 +1,8 @@
-import { buscaContaPorId } from "./consulta.js";
+import { buscaContaPorUsuarioId } from "./consulta.js";
 
-export const deletaDados = (db, id, idAlvo) => {
-    const dadosParaApagar = idAlvo || id
+export const deletaDados = (db, id) => {
 
-    const contaAlvo = buscaContaPorId(db, dadosParaApagar)
-
-     if (contaAlvo.UsuarioId !== id) {
-        const erro = new Error("Você não tem permissão para excluir os dados desta conta")
-        erro.status = 403 
-        throw erro
-    }
-
-    const usuarioId = contaAlvo.UsuarioId;
+    const contaAlvo = buscaContaPorUsuarioId(db, id)
 
     const deletaTransacoesOrigem = db.prepare(`
         DELETE FROM Transacao 
@@ -34,16 +25,16 @@ export const deletaDados = (db, id, idAlvo) => {
         `)
 
     const executaExclusão = db.transaction((uId, cId) => {
-        deletaTransacoesOrigem.run(uId)
-        deletaTransacoesDestino.run(uId)
+        deletaTransacoesOrigem.run(cId)
+        deletaTransacoesDestino.run(cId)
         deletaConta.run(cId)
         deletaUsuario.run(uId)
     })
 
     try {
-     executaExclusão(usuarioId, dadosParaApagar)
+     executaExclusão(contaAlvo.UsuarioId, contaAlvo.ContaId)
 
-     return dadosParaApagar
+     return contaAlvo.ContaId
     } catch (error) {
       const erro = new Error("Não foi possivel realizar a exclusão dos dados: " + error.message)
       erro.status = 500

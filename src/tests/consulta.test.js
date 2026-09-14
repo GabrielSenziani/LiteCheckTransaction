@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 
-import { buscaContaPorId } from "../services/consulta.js";
+import { buscaContaPorUsuarioId } from "../services/consulta.js";
 import { inicializaTabelas } from "../helpers/setupDb.js";
 
 
@@ -40,10 +40,10 @@ afterAll(() => {
 
 describe("Teste de consultas", () => {
   it("Deve ser capaz de realizar a busca pelo Id", () => {
-    const resultado = buscaContaPorId(dbTest, idDoFabio)
+    const resultado = buscaContaPorUsuarioId(dbTest, idDoFabio)
 
   expect(resultado).toBeDefined()
-  expect(resultado.ContaId).toBe(1)
+  expect(resultado.UsuarioId).toBe(idDoFabio)
   expect(resultado.Saldo).toBe(1200)
   })
 })
@@ -52,15 +52,15 @@ describe("Testando lógica quebrada", () => {
   it("Não deve ser capaz de buscar id inexistente", () => {
     const idInexistente = 123
     expect(() => {
-      buscaContaPorId(dbTest, idInexistente)
-    }).toThrow("O id da conta não existe")
+      buscaContaPorUsuarioId(dbTest, idInexistente)
+    }).toThrow("Nenhuma conta encontrada para este usuario")
   })
 
   it("Não deve ser capaz de consultar id inválido", () => {
     const idInvalido = "id-invalido"
 
     expect(() => {
-      buscaContaPorId(dbTest, idInvalido)
+      buscaContaPorUsuarioId(dbTest, idInvalido)
     }).toThrow("Formato do id inválido")
   })
 })

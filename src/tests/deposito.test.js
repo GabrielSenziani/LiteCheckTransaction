@@ -40,7 +40,7 @@ afterAll(() => {
 
 describe("Teste de Depósito - Bem sucedido", () => {
     it("Esperado que o depósito seja bem sucedido", () => {
-        const resultado = depositaDinheiro(dbTest, idUser, 100, idUser)
+        const resultado = depositaDinheiro(dbTest, idUser, 100)
 
         const contaDoUsuario = dbTest.prepare(`
             SELECT Saldo
@@ -56,7 +56,7 @@ describe("Teste de Depósito - Bem sucedido", () => {
 describe("Teste de Depósito - Mal sucedido", () => {
     it("Não deve ser capaz de realizar deposito com valor 0", () => {
         expect(() => {
-            depositaDinheiro(dbTest, idUser, 0, idUser)
+            depositaDinheiro(dbTest, idUser, 0)
         }).toThrow("O valor para realizar o depósito precisa ser maior que 0")
 
         const contaDoUsuarioSemSaldo = dbTest.prepare(`
@@ -70,7 +70,7 @@ describe("Teste de Depósito - Mal sucedido", () => {
 
    it("Não deve ser capaz de realizar deposito com valor negativo", () => {
     expect(() => {
-        depositaDinheiro(dbTest, idUser, -1, idUser)
+        depositaDinheiro(dbTest, idUser, -1)
     }).toThrow("O valor para realizar o depósito precisa ser maior que 0")
 
     const contaUser = dbTest.prepare(`
@@ -82,43 +82,11 @@ describe("Teste de Depósito - Mal sucedido", () => {
     expect(contaUser.Saldo).toBe(0)
    })
 
-   it("Não deve ser capaz de realizar deposito para uma conta que não seja de própria autoria", () => {
-    const criaSegundoUsuario = dbTest.prepare(`
-        INSERT INTO Usuario (Email, Senha)
-        VALUES (?, ?)
-        `)
-
-    const userDaVitima = criaSegundoUsuario.run("test@email.com", "senha121223")
-
-    idTeste = userDaVitima.lastInsertRowid
-
-    const criaSegundaConta = dbTest.prepare(`
-        INSERT INTO Conta (Titular, Saldo, UsuarioId)
-        VALUES (?, ?, ?)
-        `)
-
-    criaSegundaConta.run("Teste", 100, idTeste)
-
-    expect(() => {
-        depositaDinheiro(dbTest, idUser, 200, idTeste)
-    }).toThrow("Você não tem permissão para depositar nesta conta")
-
-    const contaVitima = dbTest.prepare(`
-        SELECT Saldo
-        FROM Conta
-        WHERE UsuarioId = ?
-        `).get(idTeste)
-
-    expect(contaVitima.Saldo).toBe(100)
-
-    
-   })
-
    it("Não deve ser capaz de realizar o deposito para um id inválido", () => {
     const idInexistente = "meu-id-nada-haver"
 
     expect(() => {
-        depositaDinheiro(dbTest, idUser, 10000, idInexistente)
+        depositaDinheiro(dbTest, idInexistente, 10000)
     }).toThrow("Formato do id inválido")
    })
 
@@ -126,7 +94,7 @@ describe("Teste de Depósito - Mal sucedido", () => {
     const idInexistente = 22
 
     expect(() => {
-        depositaDinheiro(dbTest, idUser, 10000, idInexistente)
-    }).toThrow("O id da conta não existe")
+        depositaDinheiro(dbTest, idInexistente, 10000)
+    }).toThrow("Nenhuma conta encontrada para este usuario")
    })
 })

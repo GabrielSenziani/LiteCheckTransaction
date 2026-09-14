@@ -38,43 +38,24 @@ afterAll(() => {
     dbTest.close()
 })
 
-describe("Testando lógica sucedida - Delete de Dados", () => {
+describe("Testando lógica bem sucedida - Delete de Dados", () => {
     it("Deve ser capaz de deletar os próprios dados", () => {
-    const resultado = deletaDados(dbTest, usuarioId, usuarioId)
+    const resultado = deletaDados(dbTest, usuarioId)
 
-    expect(resultado).toBe(1) //se houve mudança ele sera 1, se nao, ele sera 0, é aquela coisa do changes
-    })
+    expect(resultado).toBeGreaterThan(0) //se houve mudança ele sera 1, se nao, ele sera 0, é aquela coisa do changes
+    
+    const usuarioNoBanco = dbTest.prepare(`SELECT * FROM Usuario WHERE UsuarioId = ?`).get(usuarioId)
+    expect(usuarioNoBanco).toBeUndefined()
+  })
 })
 
 describe("Testando lógica falha - Não consegue deletar dados por X motivos", () => {
- it("Não deve ser capaz de deletar os dados de outro Usuario", () => {
-    const criaUsuarioAlvo = dbTest.prepare(`
-        INSERT INTO Usuario (Email, Senha)
-        VALUES (?, ?)
-        `)
-
-    const usuarioAlvo = criaUsuarioAlvo.run("alvo123@email.com", "alvo333")
-
-    alvoId = usuarioAlvo.lastInsertRowid
-
-    const criaContaAlvo = dbTest.prepare(`
-        INSERT INTO Conta (Titular, Saldo, UsuarioId)
-        VALUES (?, ?, ?)
-        `)
-
-    criaContaAlvo.run("Alvo", 100, alvoId)
-
-    expect(() => {
-        deletaDados(dbTest, usuarioId, alvoId)
-    }).toThrow(new Error("Você não tem permissão para excluir os dados desta conta"))
- })
-
 it("Não deve ser capaz de deletar dados de um Usuario inexistente", () => {
     const idQualquer = 222
 
     expect(() => {
-        deletaDados(dbTest, idQualquer, idQualquer)
-    }).toThrow(new Error("O id da conta não existe"))
+        deletaDados(dbTest, idQualquer)
+    }).toThrow(new Error("Nenhuma conta encontrada para este usuario"))
 })
 
 it("Não deve ser capaz de deletar dados buscando um id inválido", () => {

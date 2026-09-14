@@ -41,7 +41,7 @@ afterAll(() => {
 
 describe("Testando lógica de sucesso - Atualização de dados", () => {
     it("Deve atualizar os dados do Usuario com sucesso", () => {
-        const resultado = atualizaDados(dbTest, idUser, idUser, "emailnovo@email.com", "senhanova222")
+        const resultado = atualizaDados(dbTest, idUser, "emailnovo@email.com", "senhanova222")
 
         expect(resultado).toBe(idUser)
 
@@ -56,36 +56,15 @@ describe("Testando lógica de sucesso - Atualização de dados", () => {
 })
 
 describe("Testando lógica falha - Atualização de dados", () => {
-    it("Não deve atualizar dados de um outro usuario", () => {
-        const criaUsuarioAlvo = dbTest.prepare(`
-            INSERT INTO Usuario (Email, Senha)
-            VALUES (?, ?)
-            `)
-
-       usuarioAlvo = criaUsuarioAlvo.run("alvo123@email.com", "alvo5656")
-       idDoAlvo = usuarioAlvo.lastInsertRowid
-
-       const criaContaDoAlvo = dbTest.prepare(`
-        INSERT INTO Conta (Titular, Saldo, UsuarioId)
-        VALUES (?, ?, ?)
-        `)
-
-        criaContaDoAlvo.run("Alvin", 200, idDoAlvo)
-
-    expect(() => {
-        atualizaDados(dbTest, idUser, idDoAlvo)
-    }).toThrow("Você não tem permissão para atualizar os dados desta conta")
-  })
-
   it("Não deve ser capaz de atualizar os próprios dados sem colocar nenhum dado", () => {
     expect(() => {
-      atualizaDados(dbTest, idUser, idUser)
+      atualizaDados(dbTest, idUser)
     }).toThrow("É necessário preencher os campos Email e senha")
   })
 
   it("Não deve ser capaz de alterar o email para um email inválido", () => {
     expect(() => {
-     atualizaDados(dbTest, idUser, idUser, "email111.com", "senhanova111")
+     atualizaDados(dbTest, idUser, "email111.com", "senhanova111")
     }).toThrow(new Error("Formato do email inválido"))
 
     const verificaEmail = dbTest.prepare(`
@@ -99,7 +78,7 @@ describe("Testando lógica falha - Atualização de dados", () => {
 
     it("Não deve ser capaz de alterar a senha para uma senha inválida", () => {
     expect(() => {
-     atualizaDados(dbTest, idUser, idUser, "email111@email.com", "123")
+     atualizaDados(dbTest, idUser, "email111@email.com", "123")
     }).toThrow(new Error("É necessário que a senha tenha pelo menos 6 digitos"))
 
     const verificaSenha = dbTest.prepare(`

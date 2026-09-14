@@ -4,16 +4,15 @@ import db from "../database/database.js";
 export const atualizaDadosDoUsuario = (req, res) => {
     try {
         const id = req.UsuarioId
-        const { idAlvo } = req.params
         const { email, senha } = req.body
 
-        if (!id || !idAlvo) {
-            return res.status(400).json({
-                message: "Identificadores inválidos ou ausentes na requisição."
+        if (!id) {
+            return res.status(401).json({
+                message: "Usuario não autenticado."
             })
         }
 
-        atualizaDados(db, id, idAlvo, email, senha)
+        atualizaDados(db, id, email, senha)
 
         return res.status(200).json({
             message: "Dados do Usuario atualizados com sucesso"

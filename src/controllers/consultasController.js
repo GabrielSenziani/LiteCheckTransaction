@@ -1,11 +1,11 @@
-import { buscaContaPorId } from "../services/consulta.js";
+import { buscaContaPorUsuarioId } from "../services/consulta.js";
 import db from "../database/database.js";
 
 export const consulta = (req, res) => {
     try {
         const id  = req.UsuarioId
 
-        const conta = buscaContaPorId(db, id)
+        const conta = buscaContaPorUsuarioId(db, id)
 
         return res.status(200).json({
             contaId: conta.ContaId,

@@ -5,6 +5,6 @@ import { autorizacao } from "../middlewares/auth.js";
 
 const router = express.Router()
 
-router.patch("/atualiza-dados/:idAlvo", autorizacao, atualizaDadosDoUsuario)
+router.patch("/atualiza-dados", autorizacao, atualizaDadosDoUsuario)
 
 export default router

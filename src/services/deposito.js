@@ -1,7 +1,7 @@
-import { buscaContaPorId } from "./consulta.js";
+import { buscaContaPorUsuarioId } from "./consulta.js";
 
-export const depositaDinheiro = (db, idOrigem, valor, idContaAlvo) => {
-    const escolheTipoDeDeposito = db.transaction((idOrigem, valor, idContaAlvo) => {
+export const depositaDinheiro = (db, idOrigem, valor) => {
+    const escolheTipoDeDeposito = db.transaction((idOrigem, valor) => {
         
         const valorNumerico = Number(valor)
 
@@ -11,29 +11,21 @@ export const depositaDinheiro = (db, idOrigem, valor, idContaAlvo) => {
             throw erro
         }
 
-        const contaParaDepositar = idContaAlvo || idOrigem
-
-        const contaAlvo = buscaContaPorId(db, contaParaDepositar);
-
-       if (contaAlvo.UsuarioId !== idOrigem) {
-            const erro = new Error("Você não tem permissão para depositar nesta conta")
-            erro.status = 403 
-            throw erro
-        }
+        const contaAlvo = buscaContaPorUsuarioId(db, idOrigem);
 
         db.prepare(`
          UPDATE Conta 
          SET Saldo = Saldo + ? 
-         WHERE UsuarioId = ?
-        `).run(valorNumerico, contaParaDepositar)
+         WHERE ContaId = ?
+        `).run(valorNumerico, contaAlvo.ContaId)
 
         db.prepare(`
           INSERT INTO Transacao (Tipo, Valor, ContaOrigemId, ContaDestinoId)
           VALUES ('Deposito', ?, NULL, ?)
-        `).run(valorNumerico, contaParaDepositar)
+        `).run(valorNumerico, contaAlvo.ContaId)
 
         return true
     })
 
-    return escolheTipoDeDeposito.immediate(idOrigem, valor, idContaAlvo)
+    return escolheTipoDeDeposito.immediate(idOrigem, valor)
 }

@@ -13,32 +13,7 @@ export const transferir = (req, res) => {
           })
         }
 
-        const contaRemetente = db.prepare(`
-          SELECT ContaId
-          FROM Conta
-          WHERE UsuarioId = ?
-          `).get(idOrigem)
-
-          if (!contaRemetente) {
-           return res.status(404).json({ 
-            erro: "Sua conta de origem não foi encontrada." 
-          })
-        }
-
-
-        const idOrigemConta = contaRemetente.ContaId;
-
-        const contaDestinoValida = db.prepare(`
-          SELECT ContaId FROM Conta WHERE ContaId = ?
-        `).get(idDestino);
-
-        if (!contaDestinoValida) {
-            return res.status(404).json({ 
-                erro: `A conta de destino (ContaId: ${idDestino}) não existe.` 
-            });
-        }
-
-        transferirDinheiro(db, idOrigemConta, idDestino, valor)
+        transferirDinheiro(db, idOrigem, idDestino, valor)
 
         return res.status(200).json({
             message: "Transfêrencia realizada com sucesso!"

@@ -1,3 +1,4 @@
+import { buscaContaPorUsuarioId } from "./consulta.js"
 import { buscaContaPorId } from "./consulta.js"
 
 export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
@@ -11,21 +12,24 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
             throw erro
         }
 
-         if (idOrigem === idDestino) {
-            const erro = new Error("Não é possível realizar uma transferência para a sua própria conta.")
-            erro.status = 400;
-            throw erro;
-        }
+        const contaOrigem = buscaContaPorUsuarioId(db, idOrigem);
+        const idOrigemConta = contaOrigem.ContaId
 
-        buscaContaPorId(db, idOrigem)
-        buscaContaPorId(db, idDestino);
+        const contaDestino = buscaContaPorId(db, idDestino);
+        const idDestinoConta = contaDestino .ContaId
+
+         if (idOrigemConta === idDestinoConta) {
+        const erro = new Error("Não é possível realizar uma transferência para a sua própria conta.")
+        erro.status = 400;
+        throw erro;
+    }
 
     const resultadoDaConta = db.prepare(`
         UPDATE Conta
         SET Saldo = Saldo - ?
         WHERE ContaId = ?
         AND Saldo >= ?
-        `).run(valorNumerico, idOrigem, valorNumerico)
+        `).run(valorNumerico, idOrigemConta, valorNumerico)
 
     if (resultadoDaConta.changes === 0) {
      const erro = new Error("Saldo insuficiente!")
@@ -37,12 +41,12 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
          UPDATE Conta 
          SET Saldo = Saldo + ? 
          WHERE ContaId = ?
-        `).run(valorNumerico, idDestino)
+        `).run(valorNumerico, idDestinoConta)
 
     db.prepare(`
         INSERT INTO Transacao (Tipo, Valor, ContaOrigemId, ContaDestinoId)
         VALUES ('Transferencia', ?, ?, ?)
-        `).run(valorNumerico, idOrigem, idDestino)
+        `).run(valorNumerico, idOrigemConta, idDestinoConta)
 
     
 

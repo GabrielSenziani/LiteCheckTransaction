@@ -66,7 +66,7 @@ export const logaUsuario= (db, email, senha) => {
 
   if (!emailRegex.test(email)) {
     const erro = new Error ("Formato do email inválido")
-    erro.status = 401
+    erro.status = 400
     throw erro
    }
 
