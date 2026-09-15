@@ -5,11 +5,15 @@ export const consulta = (req, res) => {
     try {
         const id  = req.UsuarioId
 
-        const conta = buscaContaPorUsuarioId(db, id)
+        const contas = buscaContaPorUsuarioId(db, id)
 
-        return res.status(200).json({
+        const contasFormatadas = contas.map(conta => ({
             contaId: conta.ContaId,
             saldo: conta.Saldo
+        }))
+
+        return res.status(200).json({
+            contas: contasFormatadas
         })
     } catch (erro) {
         const statusResponse = erro.status || 500

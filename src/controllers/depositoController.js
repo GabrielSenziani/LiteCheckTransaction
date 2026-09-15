@@ -3,16 +3,16 @@ import { depositaDinheiro } from "../services/deposito.js";
 
 export const deposito = (req, res) => {
     try {
-    const idOrigem = req.UsuarioId
-    const { valor } = req.body
+    const idUsuario = req.UsuarioId
+    const { contaIdAlvo ,valor } = req.body
 
-    if (!valor) {
+    if (!contaIdAlvo || !valor) {
         return res.status(400).json({
-         message: "O campo 'valor' é obrigatório."
+         message: "O campo 'contaIdAlvo' e 'valor' são obrigatórios."
         })
     }
 
-    depositaDinheiro(db, idOrigem, valor)
+    depositaDinheiro(db, idUsuario, valor, contaIdAlvo)
 
     return res.status(200).json({
         message: "Depósito realizado com sucesso"

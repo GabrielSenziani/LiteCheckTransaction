@@ -1,17 +1,17 @@
-import { deletaDados } from "../services/deletaDados.js";
+import { deletaUsuario } from "../services/deletaDados.js";
 import db from "../database/database.js";
 
 export const deletaTodosOsDados = (req, res) => {
     try {
-        const id = req.UsuarioId
+        const idUsuario = req.UsuarioId
 
-        if (!id) {
+        if (!idUsuario) {
             return res.status(401).json({
                 message: "Usuário não autenticado."
             })
         }
 
-        deletaDados(db, id)
+        deletaUsuario(db, idUsuario)
 
         return res.status(200).json({
         message: "Exclusão dos dados realizada com sucesso!"

@@ -1,11 +1,8 @@
  import bcrypt from "bcrypt";
- import { buscaContaPorUsuarioId } from "./consulta.js";
 
  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export const atualizaDados = (db, id ,email, senha) => {
-
-    const contaAlvo = buscaContaPorUsuarioId(db, id)
 
   if (!email || !senha) {
     const erro = new Error ("É necessário preencher os campos Email e senha")
@@ -31,7 +28,7 @@ export const atualizaDados = (db, id ,email, senha) => {
     WHERE Email = ?
     `).get(email)
 
-    if (usuarioExistente  && usuarioExistente.UsuarioId !== contaAlvo.UsuarioId) {
+    if (usuarioExistente  && usuarioExistente.UsuarioId !== id) {
         const erro = new Error("Email já em uso")
         erro.status = 409
         throw erro
@@ -44,7 +41,7 @@ export const atualizaDados = (db, id ,email, senha) => {
             UPDATE Usuario
             SET Email = ?, Senha = ?
             WHERE UsuarioId = ?
-            `).run(email, senhaCriptografada, contaAlvo.UsuarioId)
+            `).run(email, senhaCriptografada, id)
 
-    return contaAlvo.UsuarioId
+    return id
 }

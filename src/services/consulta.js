@@ -30,16 +30,16 @@ export const buscaContaPorUsuarioId = (db, id) => {
         throw erro
     }
 
-    const conta = db.prepare(`
+    const contas = db.prepare(`
         SELECT ContaId, Saldo, UsuarioId
         FROM Conta
         WHERE UsuarioId = ?
-        `).get(verificaFormatoDoId)
+        `).all(verificaFormatoDoId)
 
-    if (!conta) {
+    if (contas.length === 0) {
         const erro = new Error("Nenhuma conta encontrada para este usuario")
         erro.status = 404
         throw erro
     }
-    return conta
+    return contas
 }

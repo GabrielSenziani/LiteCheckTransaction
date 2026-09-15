@@ -1,31 +1,40 @@
-import { buscaContaPorUsuarioId } from "./consulta.js";
+import { buscaContaPorUsuarioId } from "./consulta.js"
 
-export const depositaDinheiro = (db, idOrigem, valor) => {
-    const escolheTipoDeDeposito = db.transaction((idOrigem, valor) => {
-        
-        const valorNumerico = Number(valor)
+export const depositaDinheiro = (db, idUsuario, valor, contaIdAlvo) => {
 
-        if (isNaN(valorNumerico) || valorNumerico <= 0) {
-            const erro = new Error("O valor para realizar o depósito precisa ser maior que 0")
-            erro.status = 400
-            throw erro
-        }
+ const escolheTipoDeDeposito = db.transaction((idUsuario, valor, contaIdAlvo) => {
+  
+ const valorNumerico = Number(valor)
 
-        const contaAlvo = buscaContaPorUsuarioId(db, idOrigem);
+    if (isNaN(valorNumerico) || valorNumerico <= 0) {
+        const erro = new Error("O valor para realizar o depósito precisa ser maior que 0")
+        erro.status = 400
+        throw erro
+    }
 
-        db.prepare(`
-         UPDATE Conta 
-         SET Saldo = Saldo + ? 
-         WHERE ContaId = ?
-        `).run(valorNumerico, contaAlvo.ContaId)
+ const contasDoUsuario = buscaContaPorUsuarioId(db, idUsuario)
+ const contaEncontrada = contasDoUsuario.find(conta => conta.ContaId === Number(contaIdAlvo))
 
-        db.prepare(`
-          INSERT INTO Transacao (Tipo, Valor, ContaOrigemId, ContaDestinoId)
-          VALUES ('Deposito', ?, NULL, ?)
-        `).run(valorNumerico, contaAlvo.ContaId)
+   if(!contaEncontrada) {
+    const erro = new Error("A conta não foi encontrada ou você não possui permissão para depositar nesta conta.")
+    erro.status = 403
+    throw erro
+ }
 
-        return true
-    })
+    db.prepare(`
+    UPDATE Conta
+    SET Saldo = Saldo + ?
+    WHERE ContaId = ?
+    `).run(valorNumerico, contaEncontrada.ContaId)
 
-    return escolheTipoDeDeposito.immediate(idOrigem, valor)
+    db.prepare(`
+    INSERT INTO Transacao (Tipo, Valor, ContaOrigemId, ContaDestinoId)
+    VALUES ('Deposito', ?, NULL, ?)
+    `).run(valorNumerico, contaEncontrada.ContaId)
+
+
+  return true
+ })
+
+  return escolheTipoDeDeposito.immediate(idUsuario, valor, contaIdAlvo)
 }

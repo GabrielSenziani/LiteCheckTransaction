@@ -1,8 +1,8 @@
 import { buscaContaPorUsuarioId } from "./consulta.js"
 import { buscaContaPorId } from "./consulta.js"
 
-export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
-        const escolheTransferencia = db.transaction((idOrigem, idDestino, valor) => {
+export const transferirDinheiro = (db, idUsuario, contaIdOrigem, idDestino, valor) => {
+        const escolheTransferencia = db.transaction((idUsuario, contaIdOrigem, idDestino, valor) => {
         
         const valorNumerico = Number(valor)
 
@@ -12,24 +12,31 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
             throw erro
         }
 
-        const contaOrigem = buscaContaPorUsuarioId(db, idOrigem);
-        const idOrigemConta = contaOrigem.ContaId
+        const contaOrigem = buscaContaPorUsuarioId(db, idUsuario);
+        const contaEncontrada = contaOrigem.find(conta => conta.ContaId === Number(contaIdOrigem))
+
+        if(!contaEncontrada) {
+      const erro = new Error("A conta não foi encontrada ou você não possui permissão para realizar uma transferencia apartir desta conta")
+      erro.status = 403
+      throw erro;
+       }
+        
 
         const contaDestino = buscaContaPorId(db, idDestino);
-        const idDestinoConta = contaDestino .ContaId
 
-         if (idOrigemConta === idDestinoConta) {
+
+         if (Number(contaIdOrigem) === Number(idDestino)) {
         const erro = new Error("Não é possível realizar uma transferência para a sua própria conta.")
         erro.status = 400;
         throw erro;
-    }
+      }
 
     const resultadoDaConta = db.prepare(`
         UPDATE Conta
         SET Saldo = Saldo - ?
         WHERE ContaId = ?
         AND Saldo >= ?
-        `).run(valorNumerico, idOrigemConta, valorNumerico)
+        `).run(valorNumerico, contaEncontrada.ContaId, valorNumerico)
 
     if (resultadoDaConta.changes === 0) {
      const erro = new Error("Saldo insuficiente!")
@@ -41,17 +48,15 @@ export const transferirDinheiro = (db, idOrigem, idDestino, valor) => {
          UPDATE Conta 
          SET Saldo = Saldo + ? 
          WHERE ContaId = ?
-        `).run(valorNumerico, idDestinoConta)
+        `).run(valorNumerico, contaDestino.ContaId)
 
     db.prepare(`
         INSERT INTO Transacao (Tipo, Valor, ContaOrigemId, ContaDestinoId)
         VALUES ('Transferencia', ?, ?, ?)
-        `).run(valorNumerico, idOrigemConta, idDestinoConta)
+        `).run(valorNumerico, contaEncontrada.ContaId, contaDestino.ContaId)
 
-    
+  return true
+})
 
-    return true
-  })
-
-  return escolheTransferencia.immediate(idOrigem, idDestino, valor)
+  return escolheTransferencia.immediate(idUsuario, contaIdOrigem, idDestino, valor)
 }

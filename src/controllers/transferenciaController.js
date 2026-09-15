@@ -1,19 +1,18 @@
 import { transferirDinheiro } from "../services/transferencia.js";
-import { buscaContaPorId } from "../services/consulta.js";
 import db from "../database/database.js"
 
 export const transferir = (req, res) => {
     try {
-        const idOrigem = req.UsuarioId
-        const { idDestino, valor } = req.body
+        const idUsuario = req.UsuarioId
+        const { contaIdOrigem, idDestino, valor } = req.body
 
-        if(!idDestino || !valor) {
+        if(!contaIdOrigem || !idDestino || !valor) {
           return res.status(400).json({
             message: "Faltam dados obrigatórios"
           })
         }
 
-        transferirDinheiro(db, idOrigem, idDestino, valor)
+        transferirDinheiro(db, idUsuario, contaIdOrigem, idDestino, valor)
 
         return res.status(200).json({
             message: "Transfêrencia realizada com sucesso!"
