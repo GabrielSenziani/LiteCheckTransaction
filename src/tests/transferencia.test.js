@@ -7,6 +7,7 @@ let idMarcela
 let idIsadora
 let idContaMarcela
 let idContaIsadora
+let idDaSegundaria
 
 const dbTest = new Database(":memory:")
 
@@ -37,9 +38,11 @@ beforeEach(() => {
 
         const contaDaMarcela = criaContas.run("Marcela", 1700, idMarcela)
         const contaDaIsadora = criaContas.run("Isadora", 230, idIsadora)
+        const contaSegundariaDaMarcela = criaContas.run("MarcelaDois", 2000, idMarcela)
 
         idContaMarcela = contaDaMarcela.lastInsertRowid
         idContaIsadora = contaDaIsadora.lastInsertRowid
+        idDaSegundaria = contaSegundariaDaMarcela.lastInsertRowid
 })
 
 afterAll(() => {
@@ -47,13 +50,33 @@ afterAll(() => {
 })
 
 describe("Testando lógica", () => {
-    it("Marcela deve realizar uma transferência para Isadora", () => {
-      const resultado = transferirDinheiro(dbTest, idMarcela, idContaIsadora, 500)
+    it("Marcela deve ser capaz de realizar uma transferência para outra conta que seja dela", () => {
+      const resultado = transferirDinheiro(dbTest, idMarcela, idContaMarcela, idDaSegundaria, 500)
 
       const contaMarcela = dbTest.prepare(`
         SELECT Saldo
         FROM Conta
-        WHERE Contaid = ?
+        WHERE ContaId = ?
+        `).get(idContaMarcela)
+
+      const contaDaSegundaria = dbTest.prepare(`
+        SELECT Saldo
+        FROM Conta
+        WHERE ContaId = ?
+        `).get(idDaSegundaria)
+
+      expect(contaMarcela.Saldo).toBe(1200)
+      expect(contaDaSegundaria.Saldo).toBe(2500)
+      expect(resultado).toBe(true)
+    })
+
+    it("Marcela deve realizar uma transferência para Isadora", () => {
+      const resultado = transferirDinheiro(dbTest, idMarcela, idContaMarcela, idContaIsadora, 500)
+
+      const contaMarcela = dbTest.prepare(`
+        SELECT Saldo
+        FROM Conta
+        WHERE ContaId = ?
         `).get(idContaMarcela)
 
      const contaIsadora = dbTest.prepare(`
@@ -71,7 +94,7 @@ describe("Testando lógica", () => {
 describe("testando lógica falha", () => {
     it("Marcela não deve conseguir realizar a transferência por conta do Saldo insuficiente", () => {
         expect(() => {
-          transferirDinheiro(dbTest, idMarcela, idContaIsadora, 7000)
+          transferirDinheiro(dbTest, idMarcela, idContaMarcela, idContaIsadora, 7000)
         }).toThrow("Saldo insuficiente!")
 
         const contaMarcelaQuebrada = dbTest.prepare(`
@@ -92,7 +115,7 @@ describe("testando lógica falha", () => {
 
    it("Marcela não deve conseguir realizar uma transferência com valor negativo", () => {
     expect(() => {
-        transferirDinheiro(dbTest, idMarcela, idContaIsadora, -2000)
+        transferirDinheiro(dbTest, idMarcela, idContaMarcela, idContaIsadora, -2000)
     }).toThrow("O valor para realizar a transferência precisa ser maior que 0")
 
     const transferenciaNegativa = dbTest.prepare(`
@@ -117,7 +140,7 @@ describe("testando lógica falha de id", () => {
 
     it("Marcela não deve ser capaz de realizar tranferência para id inexistente", () => {
         expect(() => {
-            transferirDinheiro(dbTest, idMarcela, idInexistente, 500) 
+            transferirDinheiro(dbTest, idMarcela, idContaMarcela, idInexistente, 500) 
         }).toThrow("O id da conta não existe")
 
         const falhaMarcela = dbTest.prepare(`
@@ -140,7 +163,7 @@ describe("testando lógica falha de id", () => {
     const idInvalido = "id-invalido"
 
     expect(() => {
-        transferirDinheiro(dbTest, idMarcela, idInvalido, 400)
+        transferirDinheiro(dbTest, idMarcela, idContaMarcela, idInvalido, 400)
     }).toThrow("Formato do id inválido")
 
     const tranferênciaFalha = dbTest.prepare(`
@@ -163,7 +186,7 @@ describe("testando lógica falha de id", () => {
     const idNegativo = -1
 
     expect(() => {
-        transferirDinheiro(dbTest, idMarcela, idNegativo, 500)
+        transferirDinheiro(dbTest, idMarcela, idContaMarcela, idNegativo, 500)
     }).toThrow("Formato do id inválido")
 
     const falhaNaTransferencia = dbTest.prepare(`
@@ -180,5 +203,26 @@ describe("testando lógica falha de id", () => {
 
     expect(falhaNaTransferencia.Saldo).toBe(1700)
     expect(idNegativoNaoRecebe).toBeUndefined()
+   })
+
+   it("Marcela não deve ser capaz de realizar uma transferêcia a partir da conta da Isadora", () => {
+    expect(() => {
+        transferirDinheiro(dbTest, idMarcela, idContaIsadora, idContaMarcela, 3000)
+    }).toThrow("A conta não foi encontrada ou você não possui permissão para realizar uma transferencia apartir desta conta")
+
+    const verificaSaldo = dbTest.prepare(`
+        SELECT Saldo
+        FROM Conta
+        WHERE ContaId = ?
+        `).get(idContaIsadora)
+
+    const verificaSaldoDaMarcela = dbTest.prepare(`
+        SELECT Saldo
+        FROM Conta
+        WHERE ContaId = ?
+        `).get(idContaMarcela)
+
+    expect(verificaSaldo.Saldo).toBe(230)
+    expect(verificaSaldoDaMarcela.Saldo).toBe(1700)
    })
 })

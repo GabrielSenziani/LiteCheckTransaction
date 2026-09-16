@@ -42,9 +42,9 @@ describe("Teste de integração - Middleware de Autenticação", () => {
 
         expect(resposta.status).toBe(200)
 
-        expect(resposta.body).toHaveProperty("saldo")
-        expect(resposta.body).toHaveProperty("contaId")
-        expect(resposta.body.saldo).toBe(200)
+        expect(resposta.body).toHaveProperty("contas")
+        expect(resposta.body.contas.length).toBeGreaterThan(0)
+        expect(resposta.body.contas[0].saldo).toBe(200)
     })
 
     it("Não deve ser capaz de acessar a rota com um token inválido", async () => {

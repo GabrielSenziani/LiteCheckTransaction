@@ -4,7 +4,6 @@ import { atualizaDados } from "../services/atualizaDados.js";
 import { inicializaTabelas } from "../helpers/setupDb.js";
 
 let idUser
-let idDoAlvo
 
 const dbTest = new Database(":memory:")
 

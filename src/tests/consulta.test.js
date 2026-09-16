@@ -14,6 +14,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
+  dbTest.exec(`DELETE FROM Transacao`)
   dbTest.exec(`DELETE FROM Conta`)
   dbTest.exec(`DELETE FROM Usuario`)
 
@@ -43,8 +44,9 @@ describe("Teste de consultas", () => {
     const resultado = buscaContaPorUsuarioId(dbTest, idDoFabio)
 
   expect(resultado).toBeDefined()
-  expect(resultado.UsuarioId).toBe(idDoFabio)
-  expect(resultado.Saldo).toBe(1200)
+  expect(resultado).toHaveLength(1)
+  expect(resultado[0].UsuarioId).toBe(idDoFabio)
+  expect(resultado[0].Saldo).toBe(1200)
   })
 })
 

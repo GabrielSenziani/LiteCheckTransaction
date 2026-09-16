@@ -4,7 +4,10 @@ import { depositaDinheiro } from "../services/deposito.js";
 import { inicializaTabelas } from "../helpers/setupDb.js";
 
 let idUser
-let idTeste
+let idIsca
+let idContaComSaldo
+let idContaSemSaldo
+let idContaIsca
 
 const dbTest = new Database(":memory:")
 
@@ -22,16 +25,21 @@ beforeEach(() => {
         VALUES (?, ?)
         `)
 
+    const userIsca = criaUsuario.run("isca@email.com", "senhaDoIsca222")
+
     const user = criaUsuario.run("user3@email.com", "senhaSuperSecreta123")
 
     idUser = user.lastInsertRowid
+    idIsca = userIsca.lastInsertRowid
 
     criaConta = dbTest.prepare(`
         INSERT INTO Conta (Titular, Saldo, UsuarioId)
         VALUES (?, ?, ?)
         `)
 
-    criaConta.run("UserNovo", 0, idUser)
+    idContaSemSaldo = criaConta.run("UserNovo", 0, idUser).lastInsertRowid
+    idContaComSaldo = criaConta.run("UserNovoSegundo", 100, idUser).lastInsertRowid
+    idContaIsca = criaConta.run("contadoIsca", 100, idIsca).lastInsertRowid
 })
 
 afterAll(() => {
@@ -40,13 +48,13 @@ afterAll(() => {
 
 describe("Teste de Depósito - Bem sucedido", () => {
     it("Esperado que o depósito seja bem sucedido", () => {
-        const resultado = depositaDinheiro(dbTest, idUser, 100)
+        const resultado = depositaDinheiro(dbTest, idUser, 100, idContaSemSaldo)
 
         const contaDoUsuario = dbTest.prepare(`
             SELECT Saldo
             FROM Conta
-            WHERE UsuarioId = ?
-            `).get(idUser)
+            WHERE ContaId = ?
+            `).get(idContaSemSaldo)
 
         expect(contaDoUsuario.Saldo).toBe(100)
         expect(resultado).toBe(true)
@@ -56,28 +64,28 @@ describe("Teste de Depósito - Bem sucedido", () => {
 describe("Teste de Depósito - Mal sucedido", () => {
     it("Não deve ser capaz de realizar deposito com valor 0", () => {
         expect(() => {
-            depositaDinheiro(dbTest, idUser, 0)
+            depositaDinheiro(dbTest, idUser, 0, idContaSemSaldo)
         }).toThrow("O valor para realizar o depósito precisa ser maior que 0")
 
         const contaDoUsuarioSemSaldo = dbTest.prepare(`
             SELECT Saldo
             FROM Conta
-            WHERE UsuarioId = ?
-            `).get(idUser)
+            WHERE ContaId = ?
+            `).get(idContaSemSaldo)
 
             expect(contaDoUsuarioSemSaldo.Saldo).toBe(0)
     })
 
    it("Não deve ser capaz de realizar deposito com valor negativo", () => {
     expect(() => {
-        depositaDinheiro(dbTest, idUser, -1)
+        depositaDinheiro(dbTest, idUser, -1, idContaSemSaldo)
     }).toThrow("O valor para realizar o depósito precisa ser maior que 0")
 
     const contaUser = dbTest.prepare(`
         SELECT Saldo
         FROM Conta
-        WHERE UsuarioId = ?
-        `).get(idUser)
+        WHERE ContaId = ?
+        `).get(idContaSemSaldo)
 
     expect(contaUser.Saldo).toBe(0)
    })
@@ -86,15 +94,13 @@ describe("Teste de Depósito - Mal sucedido", () => {
     const idInexistente = "meu-id-nada-haver"
 
     expect(() => {
-        depositaDinheiro(dbTest, idInexistente, 10000)
-    }).toThrow("Formato do id inválido")
+        depositaDinheiro(dbTest, idUser, 10000, idInexistente)
+    }).toThrow("A conta não foi encontrada ou você não possui permissão para depositar nesta conta.")
    })
 
-   it("Não deve ser capaz de realizar o deposito para um id inexistente", () => {
-    const idInexistente = 22
-
+   it("Não deve ser capaz de realizar um deposito a uma conta que não pertence ao usuario", () => {
     expect(() => {
-        depositaDinheiro(dbTest, idInexistente, 10000)
-    }).toThrow("Nenhuma conta encontrada para este usuario")
+        depositaDinheiro(dbTest, idUser, 200, idContaIsca)
+    }).toThrow("A conta não foi encontrada ou você não possui permissão para depositar nesta conta")
    })
 })
