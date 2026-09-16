@@ -1,9 +1,9 @@
 import express from "express";
-import { deletaTodosOsDados } from "../controllers/deletaDadosController.js";
+import { consultaDosExtratos } from "../controllers/consultaExtratosController.js";
 import { autorizacao } from "../middlewares/auth.js";
 
 const router = express.Router()
 
-router.delete("/meus-dados", autorizacao, deletaTodosOsDados)
+router.get("/", autorizacao, consultaDosExtratos)
 
 export default router;

@@ -4,6 +4,7 @@ import "dotenv/config";
 
 import transferenciaRouter from "./routes/transferenciaRoute.js";
 import consultaRouter from "./routes/consultasRoute.js";
+import extratoRouter from "./routes/consultaExtratosRoute.js"
 import cadastroRouter from "./routes/cadastroRoute.js"
 import loginRouter from "./routes/loginRoute.js"
 import depositoRouter from "./routes/depositoRoute.js"
@@ -20,6 +21,7 @@ app.use("/login", loginRouter)
 app.use("/transferir", transferenciaRouter)
 app.use("/deposito", depositoRouter)
 app.use("/contas", consultaRouter)
+app.use("/consulta-extratos", extratoRouter)
 app.use("/deleta", deletaRouter)
 app.use("/atualiza", atualizaRouter)
 
