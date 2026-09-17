@@ -13,7 +13,19 @@ export const consultaDosExtratos = (req, res) => {
      
      const extratos = consultaExtratos(db, idUsuarioLogado)
 
-     return res.status(200).json(extratos)
+     const extratosFormatados = extratos.map(extrato => ({
+      transacaoId: extrato.TransacaoId,
+      tipo: extrato.Tipo,
+      valor: extrato.Valor,
+      contaOrigem: extrato.ContaOrigemId,
+      titularDaContaOrigem: extrato.TitularOrigem,
+      contaDestinoId: extrato.ContaDestinoId,
+      titularDaContaDestino: extrato.TitularDestino
+     }))
+
+     return res.status(200).json({
+      extratos: extratosFormatados
+     })
 
     } catch (erro) {
       const statusResponse = erro.status || 500
