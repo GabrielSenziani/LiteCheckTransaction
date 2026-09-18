@@ -10,3 +10,25 @@ export const consultaExtratos = (db, idUsuario) => {
 
   return query.all(idUsuario, idUsuario);
 }
+
+export const consultaParticipacoes = (db, idUsuario) => {
+
+  const query = db.prepare(`
+    SELECT TabelaDeParticipação.ContaId, COUNT(*) AS TotalDeParticipações
+    FROM (
+    SELECT ContaOrigemId AS ContaId
+    FROM Transacao
+    WHERE ContaOrigemId IS NOT NULL 
+    UNION ALL
+    SELECT ContaDestinoId as ContaId
+    FROM Transacao
+    ) AS TabelaDeParticipação
+
+    INNER JOIN Conta c ON c.ContaId = TabelaDeParticipação.ContaId
+    WHERE c.UsuarioId = ?
+
+    GROUP BY TabelaDeParticipação.ContaId
+    `)
+
+    return query.all(idUsuario)
+}

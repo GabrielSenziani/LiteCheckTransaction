@@ -124,4 +124,21 @@ describe("Testando consulta de Extratos - Bem Sucedido", () => {
     expect(resultado[0].TitularOrigem).toBeNull()
     expect(resultado[0].TitularDestino).toBe("Adolfo")
  })
+
+ describe("Teste consulta de Extratos - Segurança e Isolamento", () => {
+    it("Usuario não deve ser capaz de consultar um extrato caso não esteja autenticado", () => {
+        const idUsuarioNaoAutenticado = 16
+        const resultado = consultaExtratos(dbTest, idUsuarioNaoAutenticado)
+
+        expect(resultado).toHaveLength(0)
+    })
+
+    it("UsuarioB não deve ser capaz de consultar os extratos de uma conta que não seja dele", () => {
+        depositaDinheiro(dbTest, idUsuarioB, 500, idContaB)
+
+        const resultado = consultaExtratos(dbTest, idUsuarioA)
+
+        expect(resultado).toHaveLength(0)
+    })
+ })
 })
