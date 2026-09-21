@@ -10,6 +10,7 @@ import loginRouter from "./routes/loginRoute.js"
 import depositoRouter from "./routes/depositoRoute.js"
 import deletaRouter from "./routes/deletaDadosRoute.js"
 import atualizaRouter from "./routes/atualizaDadosRoute.js"
+import participacaoRouter from "./routes/participacoesRoute.js"
 
 const app = express()
 
@@ -22,6 +23,7 @@ app.use("/transferir", transferenciaRouter)
 app.use("/deposito", depositoRouter)
 app.use("/contas", consultaRouter)
 app.use("/consulta-extratos", extratoRouter)
+app.use("/consulta-participacoes", participacaoRouter)
 app.use("/deleta", deletaRouter)
 app.use("/atualiza", atualizaRouter)
 

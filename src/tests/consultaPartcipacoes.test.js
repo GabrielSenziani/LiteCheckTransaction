@@ -92,8 +92,26 @@ describe("Teste de consulta de participação - Sucesso nos casos", () => {
         expect(resultado).toEqual(
             expect.arrayContaining([
              expect.objectContaining({ContaId: idContaNova}),
-             expect.objectContaining({ContaId: idContaNova})   
+             expect.objectContaining({ContaId: idContaSegundaria})   
             ])
         )
+    })
+})
+
+describe("Teste de consulta de participação - Sucesso de Isolamento", () => {
+    it("Deve ser esperado que após a conta Isca fizer um depósito para si, o New User não tenha nada registrado em sua participação", () => {
+        depositaDinheiro(dbTest, idUsuarioIsca, 500, idContaIsca)
+
+        const confereSaldoDoIsca = dbTest.prepare(`
+            SELECT Saldo
+            FROM Conta
+            WHERE ContaId = ?
+            `).get(idContaIsca)
+
+            expect(confereSaldoDoIsca.Saldo).toBe(1400)
+
+        const resultado = consultaParticipacoes(dbTest, idNovoUsuario)
+
+        expect(resultado).toHaveLength(0)
     })
 })
