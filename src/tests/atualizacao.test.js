@@ -2,8 +2,10 @@ import Database from "better-sqlite3";
 
 import { atualizaDados } from "../services/atualizaDados.js";
 import { inicializaTabelas } from "../helpers/setupDb.js";
+import { criaUsuario, criaConta } from "../helpers/criaUsuarioEContaSetup.js";
 
 let idUser
+let idContaDoUser
 
 const dbTest = new Database(":memory:")
 
@@ -16,22 +18,8 @@ beforeEach(() => {
     dbTest.exec(`DELETE FROM Conta`)
     dbTest.exec(`DELETE FROM Usuario`)
 
-
-    criaUsuario = dbTest.prepare(`
-        INSERT INTO Usuario (Email, Senha)
-        VALUES (?, ?)
-        `)
-
-    const user = criaUsuario.run("novouser@email.com", "senhanova333")
-
-    idUser = user.lastInsertRowid
-
-    criaConta = dbTest.prepare(`
-        INSERT INTO Conta (Titular, Saldo, UsuarioId)
-        VALUES (?, ?, ?)
-        `)
-
-    contaNova = criaConta.run("UsuarioNovo", 200, idUser)
+    idUser = criaUsuario(dbTest, "novouser@email.com", "senhanova333")
+    idContaDoUser = criaConta(dbTest, "UsuarioNovo", 200, idUser)
 })
 
 afterAll(() => {

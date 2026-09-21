@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 
 import { transferirDinheiro } from "../services/transferencia.js";
 import { inicializaTabelas } from "../helpers/setupDb.js";
+import { criaConta, criaUsuario } from "../helpers/criaUsuarioEContaSetup.js";
 
 let idMarcela
 let idIsadora
@@ -20,29 +21,12 @@ beforeEach(() => {
     dbTest.exec("DELETE FROM Conta");
     dbTest.exec("DELETE FROM Usuario");
 
-    criUsuario = dbTest.prepare(`
-        INSERT INTO Usuario (Email, Senha)
-        VALUES (?, ?)
-        `)
+    idMarcela = criaUsuario(dbTest, "marcela@email.com", "senha1234")
+    idContaMarcela = criaConta(dbTest, "Marcela", 1700, idMarcela)
+    idDaSegundaria = criaConta(dbTest, "MarcelaDois", 2000, idMarcela)
 
-    const userMarcela = criUsuario.run("marcela@email.com", "senha1234")
-    const usarIsadora = criUsuario.run("isadora@email.com", "senha123")
-
-    idMarcela = userMarcela.lastInsertRowid
-    idIsadora = usarIsadora.lastInsertRowid
-
-    const criaContas = dbTest.prepare(`
-        INSERT INTO Conta (Titular, Saldo, UsuarioId)
-        VALUES (?, ?, ?)
-        `)
-
-        const contaDaMarcela = criaContas.run("Marcela", 1700, idMarcela)
-        const contaDaIsadora = criaContas.run("Isadora", 230, idIsadora)
-        const contaSegundariaDaMarcela = criaContas.run("MarcelaDois", 2000, idMarcela)
-
-        idContaMarcela = contaDaMarcela.lastInsertRowid
-        idContaIsadora = contaDaIsadora.lastInsertRowid
-        idDaSegundaria = contaSegundariaDaMarcela.lastInsertRowid
+    idIsadora = criaUsuario(dbTest, "isadora@email.com", "senha123")
+    idContaIsadora = criaConta(dbTest, "Isadora", 230, idIsadora)
 })
 
 afterAll(() => {

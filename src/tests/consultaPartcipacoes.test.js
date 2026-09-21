@@ -3,8 +3,7 @@ import { consultaParticipacoes } from "../services/consultaExtratos.js";
 import { transferirDinheiro } from "../services/transferencia.js";
 import { depositaDinheiro } from "../services/deposito.js";
 import { inicializaTabelas } from "../helpers/setupDb.js";
-import { criaUsuario } from "../helpers/criaUsuarioEContaSetup.js";
-import { criaConta } from "../helpers/criaUsuarioEContaSetup.js";
+import { criaUsuario, criaConta } from "../helpers/criaUsuarioEContaSetup.js";
 
 let idNovoUsuario
 let idUsuarioIsca

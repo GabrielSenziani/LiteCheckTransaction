@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 
 import { depositaDinheiro } from "../services/deposito.js";
 import { inicializaTabelas } from "../helpers/setupDb.js";
+import { criaUsuario, criaConta } from "../helpers/criaUsuarioEContaSetup.js";
 
 let idUser
 let idIsca
@@ -20,26 +21,12 @@ beforeEach(() => {
     dbTest.exec(`DELETE FROM Conta`)
     dbTest.exec(`DELETE FROM Usuario`)
 
-    criaUsuario = dbTest.prepare(`
-        INSERT INTO Usuario (Email, Senha)
-        VALUES (?, ?)
-        `)
+    idUser = criaUsuario(dbTest, "user3@email.com", "senhaSuperSecreta123")
+    idContaSemSaldo = criaConta(dbTest, "UserNovo", 0, idUser)
+    idContaComSaldo = criaConta(dbTest, "UserNovoSegundo", 100, idUser)
 
-    const userIsca = criaUsuario.run("isca@email.com", "senhaDoIsca222")
-
-    const user = criaUsuario.run("user3@email.com", "senhaSuperSecreta123")
-
-    idUser = user.lastInsertRowid
-    idIsca = userIsca.lastInsertRowid
-
-    criaConta = dbTest.prepare(`
-        INSERT INTO Conta (Titular, Saldo, UsuarioId)
-        VALUES (?, ?, ?)
-        `)
-
-    idContaSemSaldo = criaConta.run("UserNovo", 0, idUser).lastInsertRowid
-    idContaComSaldo = criaConta.run("UserNovoSegundo", 100, idUser).lastInsertRowid
-    idContaIsca = criaConta.run("contadoIsca", 100, idIsca).lastInsertRowid
+    idIsca = criaUsuario(dbTest, "isca@email.com", "senhaDoIsca222")
+    idContaIsca = criaConta(dbTest, "contadoIsca", 100, idIsca)
 })
 
 afterAll(() => {

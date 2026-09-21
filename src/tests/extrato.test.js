@@ -4,6 +4,8 @@ import { consultaExtratos } from "../services/consultaExtratos.js";
 import { transferirDinheiro } from "../services/transferencia.js";
 import { depositaDinheiro } from "../services/deposito.js";
 import { inicializaTabelas } from "../helpers/setupDb.js";
+import { criaUsuario, criaConta } from "../helpers/criaUsuarioEContaSetup.js";
+
 
 let idUsuarioA
 let idUsuarioB
@@ -22,30 +24,12 @@ beforeEach(() => {
     dbTest.exec(`DELETE FROM Conta`)
     dbTest.exec(`DELETE FROM Usuario`)
 
-    const criaUsuario = dbTest.prepare(`
-        INSERT INTO Usuario (Email, Senha)
-        VALUES (?, ?)
-        `)
+    idUsuarioA = criaUsuario(dbTest, "userA@email.com", "senhaSegura123")
+    idContaA = criaConta(dbTest, "Adolfo", 500, idUsuarioA)
+    idContaReservaA = criaConta(dbTest, "ReservaA", 1000, idUsuarioA)
 
-    const userA = criaUsuario.run("userA@email.com", "senhaSegura123")
-    idUsuarioA = userA.lastInsertRowid
-
-    const userB = criaUsuario.run("userB@email.com", "senha3332")
-    idUsuarioB = userB.lastInsertRowid
-
-    const criaConta = dbTest.prepare(`
-        INSERT INTO Conta (Titular, Saldo, UsuarioId)
-        VALUES (?, ?, ?)
-        `)
-
-    const contaA = criaConta.run("Adolfo", 500, idUsuarioA)
-    idContaA = contaA.lastInsertRowid
-
-    const contaB = criaConta.run("Bernado", 600, idUsuarioB)
-    idContaB = contaB.lastInsertRowid
-
-    const contaReservaA = criaConta.run("ReservaA", 1000, idUsuarioA)
-    idContaReservaA = contaReservaA.lastInsertRowid
+    idUsuarioB = criaUsuario(dbTest, "userB@email.com", "senha3332")
+    idContaB = criaConta(dbTest, "Bernado", 600, idUsuarioB)
 })
 
 afterAll(() => {

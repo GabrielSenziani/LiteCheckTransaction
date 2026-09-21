@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 
 import { deletaUsuario } from "../services/deletaDados.js";
 import { inicializaTabelas } from "../helpers/setupDb.js";
+import { criaUsuario, criaConta } from "../helpers/criaUsuarioEContaSetup.js";
 
 let usuarioId
 let usuarioIdSemSaldo
@@ -19,24 +20,11 @@ beforeEach(() => {
     dbTest.exec(`DELETE FROM Conta`)
     dbTest.exec(`DELETE FROM Usuario`)
 
-    criaUsuario = dbTest.prepare(`
-        INSERT INTO Usuario (Email, Senha)
-        VALUES (?, ?)
-        `)
+    usuarioId = criaUsuario(dbTest, "deletado123@email.com", "deletado222")
+    contaDeletada = criaConta(dbTest, "Deletado", 200, usuarioId)
 
-    const userParaDelete = criaUsuario.run("deletado123@email.com", "deletado222")
-    const userParaDeleteDeVerdade = criaUsuario.run("deleta111@email.com", "deleta333")
-
-    usuarioId = userParaDelete.lastInsertRowid
-    usuarioIdSemSaldo = userParaDeleteDeVerdade.lastInsertRowid
-
-    criaConta = dbTest.prepare(`
-        INSERT INTO Conta (Titular, Saldo, UsuarioId)
-        VALUES (?, ?, ?)
-        `)
-
-    contaDeletada = criaConta.run("Deletado", 200, usuarioId)
-    contaDeletadaDeVerdade = criaConta.run("Deletação", 0, usuarioIdSemSaldo)
+    usuarioIdSemSaldo = criaUsuario(dbTest, "deleta111@email.com", "deleta333")
+    contaDeletadaDeVerdade = criaConta(dbTest, "Deleção", 0, usuarioIdSemSaldo)
 })
 
 afterAll(() => {

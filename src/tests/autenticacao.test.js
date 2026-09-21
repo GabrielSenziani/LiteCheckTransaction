@@ -1,9 +1,12 @@
-import JWT from "jsonwebtoken"
-import supertest from "supertest"
-import app from "../app.js"
-import db from "../database/database.js"
+import JWT from "jsonwebtoken";
+import supertest from "supertest";
+import app from "../app.js";
+import db from "../database/database.js";
+
+import { criaUsuario, criaConta } from "../helpers/criaUsuarioEContaSetup.js";
 
 let usuarioId
+let contaId
 
 
 beforeEach(() => {
@@ -11,21 +14,8 @@ beforeEach(() => {
     db.exec("DELETE FROM Conta")
     db.exec("DELETE FROM Usuario")
 
-    const criaUsuario = db.prepare(`
-        INSERT INTO Usuario (Email, Senha)
-        VALUES (?, ?)
-        `)
-
-    const user = criaUsuario.run("userTest@email.com", "user123")
-
-    usuarioId = user.lastInsertRowid
-
-    const criaConta = db.prepare(`
-        INSERT INTO Conta (Titular, Saldo, UsuarioId)
-        VALUES (?, ?, ?)
-        `)
-
-    criaConta.run("User", 200, usuarioId)
+    usuarioId = criaUsuario(db, "userTest@email.com", "user123")
+    contaId = criaConta(db, "User", 200, usuarioId)
 })
 
 describe("Teste de integração - Middleware de Autenticação", () => {
