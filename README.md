@@ -480,15 +480,11 @@ Os testes utilizam bancos isolados para evitar interferência nos dados da aplic
 
 ---
 
-## Deploy
+## Deploy <https://litechecktransaction.onrender.com>
+A API foi disponibilizada no Render para demonstração. 
+Algumas rotas são protegidas por autenticação JWT e, portanto, não podem ser acessadas diretamente pelo navegador sem o envio de um token válido no header Authorization.
 
-A API foi disponibilizada no **Render** para permitir acesso remoto e demonstrar o funcionamento da aplicação.
-
-O deploy possui finalidade principalmente demonstrativa.
-
-Como o projeto utiliza SQLite com armazenamento local, ele não foi projetado para utilizar esse banco como uma solução de persistência de produção em um ambiente com filesystem efêmero.
-
-Para utilização em produção, uma evolução natural seria utilizar um banco de dados persistente, como PostgreSQL.
+O acesso à raiz da aplicação (/) também pode retornar Cannot GET /, pois a API não possui uma rota pública GET /. As rotas devem ser consumidas de acordo com seus respectivos métodos HTTP e requisitos de autenticação, utilizando ferramentas como Postman ou Insomnia.
 
 ---
 
