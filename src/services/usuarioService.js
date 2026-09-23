@@ -50,7 +50,7 @@ export const cadastraUsuario = (db, email, senha) => {
         db.prepare(`
             INSERT INTO Conta (Titular, Saldo, UsuarioId)
             VALUES (?, ?, ?)
-            `).run(nomeTitular, 0.00, idNovo) //Futuramente havera uma funcionalidade de deposito para a propria conta, por isso todas as contas criadas começam com o saldo zerado.
+            `).run(nomeTitular, 0.00, idNovo) 
 
             return idNovo
   })
